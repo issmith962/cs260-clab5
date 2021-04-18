@@ -30,26 +30,6 @@ const playerSchema = new mongoose.Schema({
 // Model for players
 const Player = mongoose.model("Player", playerSchema); 
 
-// Create a new player
-/*
-app.post("/api/players", async (req, res) => {
-	const player = new Player({
-		name: req.body.name, 
-		bio: req.body.bio, 
-		wins: req.body.wins, 
-		losses: req.body.losses, 
-		ties: req.body.ties, 
-	}); 
-	try {
-		await player.save(); 
-		res.send(player); 
-	} catch (error) {
-		console.log(error); 
-		res.sendStatus(500); 
-	}
-}); 
-*/
-
 // Create new player
 app.post("/api/players", async (req, res) => {
 	const player = new Player({
@@ -78,7 +58,7 @@ app.get("/api/players", async (req, res) => {
 		} else {
 			let player = await Player.findOne({name: name}); 
 			if (!player) {
-				res.sendStatus(403);
+				res.sendStatus(404);
 				return; 
 			}
 			res.send(player);
@@ -94,7 +74,7 @@ app.get("/api/players/:playerID", async (req, res) => {
 	try {
 		let player = await Player.findOne({_id: req.params.playerID}); 
 		if (!player) {
-			res.sendStatus(403); 
+			res.sendStatus(404); 
 			return; 
 		}
 		res.send(player); 
@@ -146,7 +126,7 @@ app.post("/api/games", async (req, res) => {
 		let playerX = await Player.findOne({_id: req.body.playerX}); 
 		let playerO = await Player.findOne({_id: req.body.playerO}); 
 		if (!playerX || !playerO) {
-			res.sendStatus(403); 
+			res.sendStatus(404); 
 			return; 
 		}
 		let game = new Game({

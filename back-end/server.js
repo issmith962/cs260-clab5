@@ -78,7 +78,7 @@ app.get("/api/players", async (req, res) => {
 		} else {
 			let player = await Player.findOne({name: name}); 
 			if (!player) {
-				res.sendStatus(404);
+				res.sendStatus(403);
 				return; 
 			}
 			res.send(player);
@@ -94,7 +94,7 @@ app.get("/api/players/:playerID", async (req, res) => {
 	try {
 		let player = await Player.findOne({_id: req.params.playerID}); 
 		if (!player) {
-			res.sendStatus(404); 
+			res.sendStatus(403); 
 			return; 
 		}
 		res.send(player); 
@@ -146,7 +146,7 @@ app.post("/api/games", async (req, res) => {
 		let playerX = await Player.findOne({_id: req.body.playerX}); 
 		let playerO = await Player.findOne({_id: req.body.playerO}); 
 		if (!playerX || !playerO) {
-			res.sendStatus(404); 
+			res.sendStatus(403); 
 			return; 
 		}
 		let game = new Game({

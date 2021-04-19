@@ -1,6 +1,7 @@
 const express = require("express"); 
 const bodyParser = require("body-parser"); 
 const mongoose = require("mongoose"); 
+const teams = require("./teams.js"); 
 
 const app = express(); 
 
@@ -13,10 +14,25 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 // connect to the database
-mongoose.connect('mongodb://localhost:27017/clab4', {
+mongoose.connect('mongodb://localhost:27017/clab5', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
+const cookieSession = require('cookie-session');
+app.use(cookieSession({
+    name: 'session',
+    keys: ['secretValue'],
+    cookie: {
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+const Team = teams.model; 
+const validTeam = teams.valid; 
 
 // Schema for players
 const playerSchema = new mongoose.Schema({
@@ -25,6 +41,10 @@ const playerSchema = new mongoose.Schema({
 	wins: Number, 
 	losses: Number, 
 	ties: Number, 
+	team: {
+		type: mongoose.Schema.ObjectId,
+		ref: "Team"
+	}, 
 }); 
 
 // Model for players
@@ -38,6 +58,7 @@ app.post("/api/players", async (req, res) => {
 		wins: req.body.wins, 
 		losses: req.body.losses, 
 		ties: req.body.ties, 
+		team: req.body.team,
 	}); 
 	try {
 		await player.save(); 
@@ -53,10 +74,10 @@ app.get("/api/players", async (req, res) => {
 	try {
 		let name = req.query.name; 
 		if (!name) {
-			let players = await Player.find();
+			let players = await Player.find().populate("team");
 			res.send(players); 
 		} else {
-			let player = await Player.findOne({name: name}); 
+			let player = await Player.findOne({name: name}).populate("team");
 			if (!player) {
 				res.sendStatus(404);
 				return; 
@@ -86,9 +107,12 @@ app.get("/api/players/:playerID", async (req, res) => {
 
 
 // Edit a player's name and bio
-app.put("/api/players/:playerID", async (req, res) => {
+app.put("/api/players/:playerID", validTeam, async (req, res) => {
 	try {
-		let player = await Player.findOne({_id:req.params.playerID}); 
+		let player = await Player.findOne({
+			_id:req.params.playerID,
+			team: req.team
+		}); 
 		if (!player) {
 			res.sendStatus(404); 
 			return; 
@@ -121,10 +145,14 @@ const gameSchema = new mongoose.Schema({
 const Game = mongoose.model("Game", gameSchema); 
 
 // Create a game
-app.post("/api/games", async (req, res) => {
+app.post("/api/games", validTeam, async (req, res) => {
 	try {
-		let playerX = await Player.findOne({_id: req.body.playerX}); 
-		let playerO = await Player.findOne({_id: req.body.playerO}); 
+		let playerX = await Player.findOne({
+			_id: req.body.playerX, 
+		}); 
+		let playerO = await Player.findOne({
+			_id: req.body.playerO,
+		}); 
 		if (!playerX || !playerO) {
 			res.sendStatus(404); 
 			return; 
@@ -177,17 +205,23 @@ app.get("/api/players/:playerID/games", async (req, res) => {
 }); 
 
 // Delete a game from a player's record (and consequently delete result from the database)
-app.delete("/api/players/:playerID/games/:gameID", async (req, res) => {
+app.delete("/api/players/:playerID/games/:gameID", validTeam, async (req, res) => {
 	try {
-		let game = await Game.findOne( {_id: req.params.gameID, }); 
+		let game = await Game.findOne( {
+			_id: req.params.gameID, 
+		}); 
 		if (!game) {
 			res.sendStatus(404); 
 			return; 
 		}
-		let playerX = await Player.findOne({_id: game.playerX}); 
-		let playerO = await Player.findOne({_id: game.playerO}); 
+		let playerX = await Player.findOne({_id: game.playerX}).populate("team"); 
+		let playerO = await Player.findOne({_id: game.playerO}).populate("team"); 
 		if (!playerX || !playerO) {
 			res.sendStatus(404); 
+			return; 
+		}
+		if ((playerX.team.teamLogin != req.team.teamLogin) || (playerO.team.teamLogin != req.team.teamLogin)) {
+			res.sendStatus(403); 
 			return; 
 		}
 		if (game.result == "x") {
@@ -218,13 +252,6 @@ app.delete("/api/players/:playerID/games/:gameID", async (req, res) => {
 
 		 
 
-	
-
-
-
-
-
-			
 
 
 
@@ -239,24 +266,7 @@ app.delete("/api/players/:playerID/games/:gameID", async (req, res) => {
 
 
 
+//const teams = require("./teams.js"); 
+app.use("/api/teams", teams.routes); 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.listen(3000, () => console.log("Server listening on port 3000!"));  
+app.listen(3004, () => console.log("Server listening on port 3004!"));  

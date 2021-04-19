@@ -1,5 +1,5 @@
 <template>
-  <div class="play">
+  <div class="training">
 		<div id="player-names">
 			<form id="x-name-form" onsubmit="event.preventDefault();">
 				<label for="x-name-input">Player X Name:</label>
@@ -70,7 +70,7 @@
 <script>
 import axios from "axios"
 export default {
-  name: "Play",
+  name: "Training",
 	data() {
 		return {
 			gameover: false,
@@ -156,6 +156,7 @@ export default {
 						wins: 0, 
 						losses: 0, 
 						ties: 0, 
+						team: this.$root.$data.team,
 					}); 
 					const player = resPostPlayer.data;
 					return player;
@@ -341,7 +342,7 @@ export default {
 </script>
 
 <style scoped>
-.play {
+.training {
 	display: flex;
 	flex-direction: column;
 }
@@ -483,8 +484,5 @@ export default {
 		height:20vh;
 		width:100%;
 	}
-
 }
-
-
 </style>

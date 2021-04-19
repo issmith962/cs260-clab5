@@ -40,7 +40,7 @@
 
 <script>
 export default {
-  name: "board",
+  name: "Board",
   props: {
 	  pos: Array,
 		gameover: String,

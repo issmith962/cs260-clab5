@@ -1,5 +1,5 @@
 <template>
-  <div class="leaderboard">
+  <div class="training-stats">
 		<p>hint: click on player names :)</p>
 		<div id="ranking-grid">
 			<div class="row" id="column-headers">
@@ -9,6 +9,9 @@
 				<div class="headers">
 					<p>Name</p>
 				</div>	
+				<div class="headers">
+					<p>Team</p>
+				</div>
 				<div class="headers">
 					<p>Wins</p>
 				</div>	
@@ -30,6 +33,9 @@
 					<p v-on:click="$router.push({ name: 'Player', params: {player: player} })"><u><strong> {{player.name}}</strong></u></p>
 					<router-view :player="player"></router-view>
 				</div>	
+				<div class="team" :style="teamColor(player)">
+					<p>{{player.team.teamName}}</p>
+				</div>
 				<div class="wins">
 					<p>{{player.wins}}</p>
 				</div>	
@@ -50,7 +56,7 @@
 <script>
 import axios from "axios";
 export default {
-	name: "Leaderboard",
+	name: "TrainingStats",
 	data() {
 		return {
 			editEnabled: false,
@@ -62,6 +68,9 @@ export default {
 		this.getPlayers(); 
 	},
 	methods: {
+		teamColor(player) {
+			return { color: player.team.color };
+		},
 		async getPlayers() {
 			try {
 				const response = await axios.get("/api/players"); 
@@ -93,13 +102,14 @@ export default {
 </script>
 
 <style scoped>
-.leaderboard {
+.training-stats {
 	display:flex;
 	flex-direction:column;
+	width:100%;
 }
 input {
 	width:50%;
-	}
+}
 #ranking-grid {
 	display: flex; 
 	flex-direction: column; 
@@ -120,6 +130,7 @@ input {
 }
 #bio-header {
 	flex-grow:3; 
+	display:none;
 }
 #rankings {
 }
@@ -129,7 +140,6 @@ input {
 	justify-content:space-between; 
 }
 .rank {
-	background-color:#bfbfbf;
 	flex-basis:0; 
 	flex-grow:1; 
 	display:flex; 
@@ -137,11 +147,19 @@ input {
 	align-items:center;
 }
 .name {
+	background-color:#bfbfbf;
 	display:flex; 
 	justify-content:center;
 	align-items:center;
 	flex-basis:0; 
-	flex-grow:1; 
+	flex-grow:2; 
+}
+.team {
+	display:flex; 
+	justify-content:center;
+	align-items:center;
+	flex-basis:0; 
+	flex-grow:2; 
 }
 .wins {
 	background-color:#bfbfbf;
@@ -169,12 +187,13 @@ input {
 .bio {
 	flex-basis:0; 
 	flex-grow:3; 
-	display:flex;
 	text-align:left;
 	padding-left:6px;
+
+	display:none;
 }
 @media (min-width: 700px) {
-	.leaderboard {
+	.training-stats {
 		display:flex;
 		justify-content:center;
 		align-items:center;
@@ -183,6 +202,17 @@ input {
 		width:60%;
 		border:5px solid #b50717;
 	}
-
+	.bio {
+		display:flex;
+	}
+	#bio-header {
+		display:flex;
+	}
+	.name {
+		flex-grow:1;
+	}
+	.team {
+		flex-grow:1;
+	}
 }
 </style>

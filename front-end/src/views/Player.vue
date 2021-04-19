@@ -21,15 +21,15 @@
 			<div class="ties">
 				<p><strong>Ties: </strong>{{player.ties}}</p>
 			</div>
-			<button v-on:click="toggleEdit">{{editMessage}}</button> 
+			<button v-if="sameTeam(player)" v-on:click="toggleEdit">{{editMessage}}</button> 
 			<hr>
 		</div>
 		<div id="game-list">
 			<h2>Games</h2>
 			<div id="game" v-for="game in games" :key="game.id">
 				<p><strong>{{game.playerX.name}}</strong> (X's) {{whoWon(game.result)}} <strong>{{game.playerO.name}}</strong> (O's)</p>
-				<button class="delete-game" v-on:click="deleteGame(game)">Delete Game</button>
-				<Board   :pos="game.position" :gameover="game.result"/>
+				<button v-if="sameTeam(player)" class="delete-game" v-on:click="deleteGame(game)">Delete Game</button>
+				<Board :pos="game.position" :gameover="game.result"/>
 			</div>
 		</div>
 	</div>
@@ -61,6 +61,12 @@ export default {
 		this.editBio = this.player.bio; 
 	}, 
 	methods: {
+		sameTeam(player) {
+			if (this.$root.$data.team == null) {
+				return false; 
+			}
+			return (player.team.teamLogin == this.$root.$data.team.teamLogin); 
+		},
 		whoWon(result) {
 			if (result == "x") {
 				return "defeated";

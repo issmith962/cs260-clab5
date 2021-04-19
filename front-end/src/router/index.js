@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import Play from "../views/Play.vue";
+
+import Login from "../views/Login.vue";
 
 Vue.use(VueRouter);
 
@@ -8,28 +9,38 @@ const routes = [
 	{
 		path: "/",
 		name: "Default",
-		component: Play,
+		component: Login,
 	},
-  {
-    path: "/play",
-    name: "Play",
-    component: Play,
-  },
+	{
+		path: "/register", 
+		name: "Register",
+		component: () => import("../views/Register.vue"),
+	},
+	{
+		path: "/login", 
+		name: "Login",
+		component: () => import("../views/Login.vue"),
+	},
+	{
+		path: "/Roster",
+		name: "Roster", 
+		component: () => import("../views/Roster.vue"),
+	},
 	{
 		path: "/player", 
 		name: "Player", 
 		props: true,
-		component: () => 
-			import("../views/Player.vue"), 
+		component: () => import("../views/Player.vue"),
 	}, 
   {
-    path: "/leaderboard",
-    name: "Leaderboard",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/Leaderboard.vue"),
+    path: "/training",
+    name: "Training",
+    component: () => import("../views/Training.vue"),
+  },
+  {
+    path: "/trainingstats",
+    name: "Training Stats",
+    component: () => import("../views/TrainingStats.vue"),
   },
 ];
 

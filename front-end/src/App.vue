@@ -5,8 +5,19 @@
 				<h1>Tic-Tac-Toe</h1>
 			</div>
 			<div id="nav">
-				<router-link to="/play">Play</router-link> |
-				<router-link to="/leaderboard">Leaderboard</router-link>
+				<div class="nav-options">
+					<div v-if="loggedIn">
+						<router-link to="/training">Training</router-link> |
+					</div>
+					<router-link to="/trainingstats">Training Stats</router-link>
+				</div>
+				<div class="nav-options" v-if="loggedIn">
+					<p id="team-name">Team Name: {{this.$root.$data.team.teamName}}</p>
+					<button id="logout-button" @click="logout">Logout</button>
+				</div>
+				<div v-else>
+					<button id="login-button" @click="login">Sign In</button>
+				</div>
 			</div>
 			<router-view />
 			<div id="footer">
@@ -15,6 +26,47 @@
 		</div>
   </div>
 </template>
+
+<script>
+import axios from "axios";
+import 'vue-swatches/dist/vue-swatches.css';
+export default {
+	computed: {
+		loggedIn() {
+			if (this.$root.$data.team) {
+				return true; 
+			} else {
+				return false;
+			}
+		}, 
+	},
+	async created() {
+		try {
+			let response = await axios.get("/api/teams"); 
+			this.$root.$data.team = response.data.team; 
+			//this.$router.push({name: "Training"}); 
+		} catch (error) {
+			this.$root.$data.team = null;
+			this.$router.push({name: "Login"}); 
+		}
+	}, 
+	methods: {
+		async	logout() {
+			try {
+				await axios.delete("/api/teams"); 
+				this.$root.$data.team = null; 
+			} catch (error) {
+				this.$root.$data.team = null; 
+			}
+			this.login(); 
+		}, 
+		login() {
+			this.$router.push({name: "Login"}); 
+		}, 
+	}, 
+}
+</script>
+
 
 <style>
 #app {
@@ -38,8 +90,16 @@
 #nav {
   padding: 20px;
 	padding-top: 20px;
+	display:flex;
+	flex-direction:column;
+	justify-content:space-between;
+	align-items:center;
 }
-
+.nav-options {
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+}
 #nav a {
   font-weight: bold;
   color: #2c3e50;
@@ -57,7 +117,15 @@
 	background-color: #b50717; 
 	color: #131313;
 }
-
+#team-name {
+	margin-right:8px;
+}
+#logout-button {
+	height:4vh;
+}
+#login-button {
+	margin-top:5px;
+}
 #footer {
 	margin-top:auto;
 	display:flex;
@@ -74,6 +142,12 @@
 #git-link {
 	text-decoration:none!important;
 	color:#131313;
+}
+@media (min-width: 700px) {
+	#nav {
+		flex-direction:row;
+		align-items:left;
+	}
 }
 
 </style>
